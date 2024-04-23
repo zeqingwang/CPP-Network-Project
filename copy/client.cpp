@@ -13,7 +13,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <limits>
+
 void error(const char *msg)
 {
     perror(msg);
@@ -59,16 +59,14 @@ int main()
     std::string username, password;
     std::cout << "Please enter the username: ";
     std::cin >> username;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Please enter the password (\"Enter\" to skip for guests): ";
-    std::getline(std::cin, password);
-    std::cout << "password: " + password << std::endl;
+    std::getline(std::cin >> std::ws, password); // Read the full line, allowing to skip
 
-    // if (!password.empty())
-    // {
-    username = encrypt(username);
-    password = encrypt(password);
-    // }
+    if (!password.empty())
+    {
+        username = encrypt(username);
+        password = encrypt(password);
+    }
 
     std::string message = username + ":" + password;
     send(sockfd, message.c_str(), message.length(), 0);
@@ -78,9 +76,9 @@ int main()
         error("ERROR reading from socket");
 
     std::cout << buffer << std::endl; // Display server's response
-    while (true)
-    {
-    }
+    // while (true)
+    // {
+    // }
     close(sockfd);
     return 0;
 }

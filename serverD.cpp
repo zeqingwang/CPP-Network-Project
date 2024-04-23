@@ -67,7 +67,7 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
 int main()
 {
     std::string server_ip = "127.0.0.1";
-    int serverS_portno = 41203;
+    int serverS_portno = 42203;
     int sockS_fd = initial_UDP_socket(serverS_addr, serverS_portno);
     int serverM_portno = 44203;
     memset(&serverM_addr, 0, sizeof(serverM_addr));
@@ -76,7 +76,7 @@ int main()
     if (inet_pton(AF_INET, server_ip.c_str(), &serverM_addr.sin_addr) <= 0)
         error("ERROR on inet_pton");
     // Load room data from file
-    std::unordered_map<std::string, int> roomAvailability = load_data("single.txt");
+    std::unordered_map<std::string, int> roomAvailability = load_data("double.txt");
 
     std::string message;
     for (const auto &[roomCode, count] : roomAvailability)

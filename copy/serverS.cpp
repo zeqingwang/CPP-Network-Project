@@ -78,30 +78,15 @@ int main()
     // Load room data from file
     std::unordered_map<std::string, int> roomAvailability = load_data("single.txt");
 
-    std::string message;
+    // Send room statuses to the main server
     for (const auto &[roomCode, count] : roomAvailability)
     {
-        if (!message.empty())
-        {
-            message += ";"; // Use a semicolon as a separator for different entries
-        }
-        message += roomCode + "," + std::to_string(count);
+        std::string message = roomCode + "," + std::to_string(count);
+        if (sendto(sockS_fd, message.c_str(), message.length(), 0, (struct sockaddr *)&serverM_addr, sizeof(serverM_addr)) < 0)
+            error("ERROR in sendto");
     }
 
-    // Send room statuses to the main server in a single UDP packet
-    if (!message.empty())
-    {
-        if (sendto(sockS_fd, message.c_str(), message.length(), 0,
-                   (struct sockaddr *)&serverM_addr, sizeof(serverM_addr)) < 0)
-        {
-            error("ERROR in sendto");
-        }
-        std::cout << "Sent room statuses to Main Server: " << message << std::endl;
-    }
-    else
-    {
-        std::cout << "No room statuses to send." << std::endl;
-    }
+    std::cout << "ServerS is running. Sent room statuses to Main Server." << std::endl;
 
     close(sockS_fd);
     return 0;
