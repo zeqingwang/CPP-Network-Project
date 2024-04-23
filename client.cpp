@@ -80,6 +80,21 @@ int main()
     std::cout << buffer << std::endl; // Display server's response
     while (true)
     {
+        std::string roomcode, querytype;
+        std::cout << "Please enter the room code: ";
+        std::cin >> roomcode;
+        std::cout << "Would you like to search for the availability or make a reservation? (Enter “Availability” to search for the availability or Enter “Reservation” to make a reservation ): ";
+        std::cin >> querytype;
+        std::string message = querytype + "," + roomcode;
+        send(sockfd, message.c_str(), message.length(), 0);
+        std::cout << "client sent to serverM ";
+        int n = read(sockfd, buffer, 1023);
+        if (n < 0)
+            error("ERROR reading from socket");
+
+        std::cout << buffer << std::endl;
+
+        // availability or Enter “Reservation” to make a reservation ): Availability
     }
     close(sockfd);
     return 0;

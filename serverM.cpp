@@ -19,6 +19,12 @@
 #include <signal.h>
 struct sockaddr_in serverM_UDP_addr, serverM_TCP_addr, subserver_addr;
 std::unordered_map<std::string, std::string> credentials;
+struct ClientInfo
+{
+    int sockfd;
+    bool isAuthenticated;
+    std::string role;
+};
 void error(const char *msg)
 {
     perror(msg);
@@ -155,6 +161,8 @@ int main()
     int serverM_TCP_portno = 45203;
     int sockM_UDP_fd = initial_UDP_socket(serverM_UDP_addr, serverM_UDP_portno);
     int sockM_TCP_fd = initial_TCP_socket(serverM_TCP_addr, serverM_TCP_portno);
+    // fd_set readfds;
+    //  int max_fd;
     int newsockfd;
     socklen_t subserver_len;
 
