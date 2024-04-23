@@ -55,13 +55,37 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(portno);
 
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         error("ERROR on binding");
 
     return sockfd;
+}
+void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_map<std::string, int> &roomAvailability)
+{
+    char buffer[1024];
+    socklen_t client_addr_len = sizeof(client_addr); // Define and initialize the length variable
+    int n = recvfrom(sockfd, buffer, 1023, 0, (struct sockaddr *)&client_addr, &client_addr_len);
+    if (n < 0)
+        error("ERROR in recvfrom");
+
+    buffer[n] = '\0'; // Null-terminate string
+    std::string response(buffer);
+    std::cout << "Received query: " << response << std::endl;
+    sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
+
+    // if (roomAvailability.count(request) > 0)
+    // {
+    //     std::string response = "Room " + request + " availability: " + std::to_string(roomAvailability[request]);
+    //     sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, addrlen);
+    // }
+    // else
+    // {
+    //     std::string response = "Room code not found.";
+    //     sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, addrlen);
+    // }
 }
 
 int main()
@@ -102,7 +126,11 @@ int main()
     {
         std::cout << "No room statuses to send." << std::endl;
     }
-
+    // Main loop to handle incoming queries
+    while (true)
+    {
+        respondToQuery(sockS_fd, serverM_addr, roomAvailability);
+    }
     close(sockS_fd);
     return 0;
 }

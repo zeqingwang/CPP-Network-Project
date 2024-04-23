@@ -55,7 +55,7 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(portno);
 
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
