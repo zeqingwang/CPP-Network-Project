@@ -71,74 +71,29 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
     if (n < 0)
         error("ERROR in recvfrom");
 
-    // buffer[n] = '\0'; // Null-terminate string
-    // std::string response(buffer);
-    // std::cout << "Received query: " << response << std::endl;
-    // sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
-    buffer[n] = '\0'; // Ensure null-termination
-    std::string received(buffer);
+    buffer[n] = '\0'; // Null-terminate string
+    std::string response(buffer);
+    std::cout << "Received query: " << response << std::endl;
+    sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
 
-    auto pos = received.find(',');
-    std::string queryType = received.substr(0, pos);
-    std::string roomCode = received.substr(pos + 1);
-    std::cout << "The Server S received an " + queryType + " request from the main server." << std::endl;
-    std::string response;
-    std::string output;
-    std::string conclusion = "The Server S finished sending the response to the main server.";
-    if (queryType == "Reservation")
-    {
-        if (roomAvailability.count(roomCode) > 0)
-        {
-            if (roomAvailability[roomCode] > 0)
-            {
-                roomAvailability[roomCode]--;
-                output = "Successful reservation. The count of Room " + roomCode + " is now " + std::to_string(roomAvailability[roomCode]) + ".";
-                conclusion = "The Server S finished sending the response and the updated room status to the main server.";
-            }
-            else
-            {
-                output = "Cannot make a reservation. Room " + roomCode + " is not available.";
-            }
-        }
-        else
-        {
-            output = "Cannot make a reservation. Not able to find the room layout.";
-        }
-    }
-    else
-    {
-        if (roomAvailability.count(roomCode) > 0)
-        {
-            if (roomAvailability[roomCode] > 0)
-            {
-
-                output = "Room " + roomCode + " is available.";
-            }
-            else
-            {
-                output = "Room " + roomCode + " is not available.";
-            }
-        }
-        else
-        {
-            output = "Not able to find the room layout.";
-        }
-    }
-
-    std::cout << output << std::endl;
-    sendto(sockfd, output.c_str(), output.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
-    std::cout << conclusion << std::endl;
+    // if (roomAvailability.count(request) > 0)
+    // {
+    //     std::string response = "Room " + request + " availability: " + std::to_string(roomAvailability[request]);
+    //     sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, addrlen);
+    // }
+    // else
+    // {
+    //     std::string response = "Room code not found.";
+    //     sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, addrlen);
+    // }
 }
 
 int main()
 {
     std::string server_ip = "127.0.0.1";
     int serverS_portno = 41203;
-    std::string server_name = "s";
     int sockS_fd = initial_UDP_socket(serverS_addr, serverS_portno);
     int serverM_portno = 44203;
-    std::cout << "The Server S is up and running using UDP on port <41203>." << std::endl;
-
     memset(&serverM_addr, 0, sizeof(serverM_addr));
     serverM_addr.sin_family = AF_INET;
     serverM_addr.sin_port = htons(serverM_portno);
@@ -165,8 +120,7 @@ int main()
         {
             error("ERROR in sendto");
         }
-        // std::cout << "Sent room statuses to Main Server: " << message << std::endl;
-        std::cout << "The Server S has sent the room status to the main server." << std::endl;
+        std::cout << "Sent room statuses to Main Server: " << message << std::endl;
     }
     else
     {
