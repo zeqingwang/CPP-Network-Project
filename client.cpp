@@ -51,16 +51,16 @@ int main()
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
-
+    // Beej code
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(45203);
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
+    // end
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
         error("ERROR connecting");
     if (getsockname(sockfd, (struct sockaddr *)&client_addr, &len) == -1)
     {
-        error("getsockname() failed");
+        error(" failed");
     }
     std::cout << "Client is up and running.";
     std::string username, password;
@@ -70,7 +70,6 @@ login:
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Please enter the password: ";
     std::getline(std::cin, password);
-    // std::cout << "password: " + password << std::endl;
 
     if (!password.empty())
     {
@@ -87,16 +86,13 @@ login:
 
     std::string message = username + ":" + password;
     send(sockfd, message.c_str(), message.length(), 0);
-    // if ()
 
     int n = read(sockfd, buffer, 1023);
     if (n < 0)
         error("ERROR reading from socket");
 
-    // std::cout << buffer << std::endl; // Display server's response
-    std::string strBuffer(buffer); // Convert buffer to std::string
+    std::string strBuffer(buffer);
 
-    // Check if the content of the buffer is "member"
     if (strBuffer == "member")
     {
         std::cout << "Welcome member " + raw_username + "!" << std::endl;
@@ -128,7 +124,7 @@ login:
         std::cin >> roomcode;
         std::cout << "Would you like to search for the availability or make a reservation? (Enter “Availability” to search for the availability or Enter “Reservation” to make a reservation ): ";
         std::cin >> querytype;
-        // querytype = std::tolower(querytype);
+
         if (querytype == "Availability")
         {
             querytype = "availability";

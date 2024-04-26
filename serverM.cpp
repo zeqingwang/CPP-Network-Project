@@ -82,7 +82,7 @@ void handleUDP(int sockM_UDP_fd)
         {
             std::string roomCode = entry.substr(0, delimiter_pos);
             server_name = roomCode.substr(0, 1);
-            int count = std::stoi(entry.substr(delimiter_pos + 1));
+            // int count = std::stoi(entry.substr(delimiter_pos + 1));
         }
     }
     std::cout << "The main server has received the room status from Server " + server_name + " using UDP over port 44203." << std::endl;
@@ -143,7 +143,7 @@ void sendUdpQuery(int sockfd, const std::string &message, struct sockaddr_in ser
 
     if (sendto(sock, message.c_str(), message.size(), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
-        std::cerr << "Send to backend serverfailed\n";
+        std::cerr << "Send to backend server failed\n";
     }
 
     std::cout << "The main server sent a request to Server " + server_name + "." << std::endl;
@@ -252,12 +252,12 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
-
+    // Beej code
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(portno);
-
+    // end
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         error("ERROR on binding");
 
@@ -270,18 +270,20 @@ int initial_TCP_socket(struct sockaddr_in addr, int portno)
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
-
+    // Beej code
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(portno);
+    // end
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         error("ERROR on binding");
     return sockfd;
 }
 void initial_UDP_connection(struct sockaddr_in *addr, int portno)
 {
-    memset(addr, 0, sizeof(addr));
+    // Beej code;
+    memset(addr, 0, sizeof(*addr));
     addr->sin_family = AF_INET;
     addr->sin_addr.s_addr = inet_addr("127.0.0.1");
     addr->sin_port = htons(portno);
@@ -308,6 +310,7 @@ int main()
     int max_sd;
     while (true)
     {
+        // These FD functions after finish after reviewing the Beej tutorial
         FD_ZERO(&readfds);
         FD_SET(sockM_UDP_fd, &readfds);
         FD_SET(sockM_TCP_fd, &readfds);
