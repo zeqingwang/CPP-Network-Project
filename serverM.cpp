@@ -91,7 +91,7 @@ void handleUDP(int sockM_UDP_fd)
 void attemptLogin(int sockfd, const std::string &received, ClientInfo &clientInfo)
 {
 
-    size_t delimiter = received.find(':');
+    size_t delimiter = received.find(',');
     std::string username = received.substr(0, delimiter);
     std::string password = received.substr(delimiter + 1);
 
@@ -291,7 +291,13 @@ void initial_UDP_connection(struct sockaddr_in *addr, int portno)
 
 int main()
 {
+#ifdef EXTRA_ENCRYPTION
+
+    credentials = loadCredentials("member_extra.txt");
+#else
     credentials = loadCredentials("member.txt");
+#endif
+
     std::string server_ip = "127.0.0.1";
     int serverM_UDP_portno = 44203;
     int serverM_TCP_portno = 45203;

@@ -5,6 +5,10 @@ CFLAGS = -Wall -g
 # Target executables
 all: serverM serverS serverD serverU client
 
+# Extra compilation with encryption
+extra: CFLAGS += -DEXTRA_ENCRYPTION
+extra: serverM serverS serverD serverU client
+
 # Compilation recipes
 serverM: serverM.cpp
 	$(CC) $(CFLAGS) -o serverM serverM.cpp

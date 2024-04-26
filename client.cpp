@@ -15,6 +15,8 @@
 #include <cstring>
 #include <limits>
 #include <cctype>
+#include <fstream>
+#include <iomanip>
 void error(const char *msg)
 {
     perror(msg);
@@ -37,6 +39,27 @@ std::string encrypt(const std::string &data)
         }
     }
     return encrypted;
+}
+std::string xor_encrypt(const std::string &data)
+{
+    // char key = 'W';
+    // std::string xorstring = data;
+    // for (size_t i = 0; i < data.size(); i++)
+    // {
+    //     xorstring[i] = data[i] ^ key;
+    // }
+    // // std::cout << xorstring << std::endl;
+
+    // return xorstring;
+    char key = 'W';
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (unsigned char c : data)
+    {
+        unsigned char encryptedChar = c ^ key;
+        ss << std::setw(2) << static_cast<int>(encryptedChar);
+    }
+    return ss.str();
 }
 
 int main()
@@ -80,11 +103,20 @@ login:
         std::cout << username + " sent a guest request to the main server using TCP over port " << ntohs(client_addr.sin_port) << ".\n";
     }
     std::string raw_username = username;
+#ifdef EXTRA_ENCRYPTION
+
+    username = xor_encrypt(username);
+    password = xor_encrypt(password);
+
+#else
     username = encrypt(username);
     password = encrypt(password);
+
+#endif
+
     // }
 
-    std::string message = username + ":" + password;
+    std::string message = username + "," + password;
     send(sockfd, message.c_str(), message.length(), 0);
 
     int n = read(sockfd, buffer, 1023);
