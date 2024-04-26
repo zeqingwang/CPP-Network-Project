@@ -20,7 +20,7 @@
 struct sockaddr_in serverM_UDP_addr, serverM_TCP_addr, subserver_addr;
 struct sockaddr_in serverS_UDP_addr, serverD_UDP_addr, serverU_UDP_addr;
 std::unordered_map<std::string, std::string> credentials;
-// clients map
+
 struct ClientInfo
 {
     int sockfd;
@@ -69,14 +69,11 @@ void handleUDP(int sockM_UDP_fd)
         error("ERROR in recvfrom");
     }
 
-    // std::cout << "Received UDP data: " << buffer << std::endl;
-
-    // Parse the received UDP data
-    std::string data(buffer, n); // Convert char array to string
+    std::string data(buffer, n);
     std::istringstream dataStream(data);
     std::string entry;
     std::string server_name;
-    // Process each room status entry separated by ';'
+
     while (std::getline(dataStream, entry, ';'))
     {
 
@@ -86,21 +83,18 @@ void handleUDP(int sockM_UDP_fd)
             std::string roomCode = entry.substr(0, delimiter_pos);
             server_name = roomCode.substr(0, 1);
             int count = std::stoi(entry.substr(delimiter_pos + 1));
-            // std::cout << "Room Code: " << roomCode << ", Availability: " << count << std::endl;
         }
     }
-    std::cout << "The main server has received the room status from Server " + server_name + " using UDP over port 34203." << std::endl;
+    std::cout << "The main server has received the room status from Server " + server_name + " using UDP over port 44203." << std::endl;
 }
 
 void attemptLogin(int sockfd, const std::string &received, ClientInfo &clientInfo)
 {
-    // char buffer[1024] = {0};
-    // read(sock, buffer, 1023);
-    // std::string received(buffer);
+
     size_t delimiter = received.find(':');
     std::string username = received.substr(0, delimiter);
     std::string password = received.substr(delimiter + 1);
-    // std::cout << received << std::endl;
+
     std::string response;
     std::string output;
     std::string conclusion = "The main server sent the authentication result to the client.";
@@ -130,8 +124,6 @@ void attemptLogin(int sockfd, const std::string &received, ClientInfo &clientInf
     else if (credentials[username] != password)
     {
         output = "The main server received the authentication for " + username + " using TCP over port 45203.";
-        // std::cout << credentials[username] << std::endl;
-        // std::cout << password << std::endl;
 
         response = "password";
     }
@@ -148,13 +140,6 @@ void sendUdpQuery(int sockfd, const std::string &message, struct sockaddr_in ser
         std::cerr << "Socket creation failed\n";
         return;
     }
-
-    // struct sockaddr_in serverAddr;
-    //  if ()
-    //  memset(&serverAddr, 0, sizeof(serverAddr));
-    //  serverAddr.sin_family = AF_INET;
-    //  serverAddr.sin_port = htons(serverPort);
-    //  serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if (sendto(sock, message.c_str(), message.size(), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
@@ -179,22 +164,21 @@ void sendUdpQuery(int sockfd, const std::string &message, struct sockaddr_in ser
         pos = temp.find(',');
         std::string roomCode = temp.substr(0, pos);
         std::string queryResult = temp.substr(pos + 1);
-        // std::cout << "Result: " + queryResult << std::endl;
-        // std::cout << "Received from server: " << buffer << std::endl;
+
         if (queryType == "availability")
         {
-            std::cout << "The main server received the response from Server " + server_name + " using UDP over port 34203." << std::endl;
+            std::cout << "The main server received the response from Server " + server_name + " using UDP over port 44203." << std::endl;
         }
         else
         {
             if (queryResult == "yes")
             {
-                std::cout << "The main server received the response and the updated room status from Server " + server_name + " using UDP over port 34203." << std::endl;
+                std::cout << "The main server received the response and the updated room status from Server " + server_name + " using UDP over port 44203." << std::endl;
                 std::cout << "The room status of Room " + roomCode + " has been updated." << std::endl;
             }
             else
             {
-                std::cout << "The main server received the response from Server " + server_name + " using UDP over port 34203." << std::endl;
+                std::cout << "The main server received the response from Server " + server_name + " using UDP over port 44203." << std::endl;
             }
         }
         send(sockfd, received.c_str(), received.length(), 0);
@@ -206,18 +190,14 @@ void sendUdpQuery(int sockfd, const std::string &message, struct sockaddr_in ser
 
 void processQuery(int sockfd, const std::string &received, ClientInfo &clientInfo)
 {
-    // char buffer[1024] = {0};
-    // read(sock, buffer, 1023);
-    // std::string received(buffer);
+
     std::string response;
     size_t delimiter = received.find(',');
     std::string querytype = received.substr(0, delimiter);
     std::string roomcode = received.substr(delimiter + 1);
-    // response = "Query Type: " + querytype + ", Room Code: " + roomcode + ", Client Role: " + clientInfo.role;
-    //  std::cout << response << std::endl;
-    //   send(sockfd, response.c_str(), response.length(), 0);
+
     std::cout << "The main server has received the " + querytype + " request on Room " + roomcode + " from " + clientInfo.username + " using TCP over port 45203." << std::endl;
-    // Determine target server based on room code
+
     if (clientInfo.role == "guest" && querytype == "reservation")
     {
 
@@ -246,20 +226,14 @@ void processQuery(int sockfd, const std::string &received, ClientInfo &clientInf
             send(sockfd, error.c_str(), error.length(), 0);
         }
     }
-
-    // if (targetPort > 0)
-    // {
-    //     sendUdpQuery(querytype + "," + roomCode, ser);
-    // }
 }
 void handleClient(int sockfd)
 {
-    // while (true)
-    // {
+
     char buffer[1024] = {0};
     int read_size = read(sockfd, buffer, sizeof(buffer) - 1);
     if (read_size <= 0)
-        return; // Break on error or disconnect
+        return;
 
     std::string received(buffer);
     if (clients[sockfd].isAuthenticated)
@@ -270,9 +244,6 @@ void handleClient(int sockfd)
     {
         attemptLogin(sockfd, received, clients[sockfd]);
     }
-    // }
-    // close(sockfd);
-    // clients.erase(sockfd);
 }
 int initial_UDP_socket(struct sockaddr_in addr, int portno)
 {
@@ -327,13 +298,8 @@ int main()
     initial_UDP_connection(&serverS_UDP_addr, 41203);
     initial_UDP_connection(&serverD_UDP_addr, 42203);
     initial_UDP_connection(&serverU_UDP_addr, 43203);
-    // fd_set readfds;
-    //  int max_fd;
-    // int newsockfd;
-    // socklen_t subserver_len;
-    // subserver_len = sizeof(subserver_addr);
-    // char buffer[256];
-    std::unordered_map<std::string, int> roomStatuses; // Stores room statuses from backend servers
+
+    std::unordered_map<std::string, int> roomStatuses;
 
     std::cout << "ServerM is running. Waiting for room statuses..." << std::endl;
     listen(sockM_TCP_fd, 5);
@@ -362,13 +328,6 @@ int main()
             handleUDP(sockM_UDP_fd);
         }
 
-        // if (FD_ISSET(sockM_TCP_fd, &readfds))
-        // {
-        //     newsockfd = accept(sockM_TCP_fd, (struct sockaddr *)&subserver_addr, &subserver_len);
-        //     if (newsockfd < 0)
-        //         error("ERROR on accept");
-        //     handleTCP(newsockfd);
-        // }
         if (FD_ISSET(sockM_TCP_fd, &readfds))
         {
             struct sockaddr_in cli_addr;
@@ -380,24 +339,16 @@ int main()
             }
             else
             {
-                clients[newsockfd] = {newsockfd, "", false, ""}; // Initialize a new client session
-                handleClient(newsockfd);                         // Manage client connection in a function
+                clients[newsockfd] = {newsockfd, "", false, ""};
+                handleClient(newsockfd);
             }
         }
         for (auto it = clients.begin(); it != clients.end();)
         {
             if (FD_ISSET(it->first, &readfds))
             {
-                handleClient(it->first); // Continue handling existing client session
-                // if (/* condition to erase client */)
-                // {
-                //     close(it->first);
-                //     it = clients.erase(it); // Safely erase client and advance iterator
-                // }
-                // else
-                // {
-                //     ++it;
-                // }
+                handleClient(it->first);
+
                 ++it;
             }
             else
@@ -411,57 +362,3 @@ int main()
     close(sockM_TCP_fd);
     return 0;
 }
-// subserver_len = sizeof(subserver_addr);
-// memset(buffer, 0, 256);
-// int n = recvfrom(sockM_fd, buffer, 256, 0, (struct sockaddr *)&serverM_addr, &subserver_len);
-// if (n < 0)
-//     error("ERROR in recvfrom");
-
-// std::string received(buffer);
-// std::cout << "Received room status from backend: " << received << std::endl;
-
-// // Process the received room status (example: "S233,6")
-// auto delimiter_pos = received.find(',');
-// std::string roomCode = received.substr(0, delimiter_pos);
-// int count = std::stoi(received.substr(delimiter_pos + 1));
-
-// roomStatuses[roomCode] = count; // Store in the map
-
-// // Assuming the client sends queries like "check:room123" or "reserve:room123"
-// size_t delimiter = received.find(':');
-// if (delimiter == std::string::npos)
-// {
-//     const std::string error_msg = "Invalid query format. Use action:roomcode.";
-//     send(sockfd, error_msg.c_str(), error_msg.length(), 0);
-//     return;
-// }
-
-// std::string action = received.substr(0, delimiter);
-// std::string roomCode = received.substr(delimiter + 1);
-
-// if (action == "check")
-// {
-//     // Handle room check
-//     std::string response = "Availability for " + roomCode + ": ";
-//     response += "10 rooms available"; // Placeholder response
-//     send(sockfd, response.c_str(), response.length(), 0);
-// }
-// else if (action == "reserve")
-// {
-//     if (clientInfo.role == "member")
-//     {
-//         // Handle reservation
-//         std::string response = "Reservation for " + roomCode + " successful.";
-//         send(sockfd, response.c_str(), response.length(), 0);
-//     }
-//     else
-//     {
-//         std::string error_msg = "Guests cannot make reservations.";
-//         send(sockfd, error_msg.c_str(), error_msg.length(), 0);
-//     }
-// }
-// else
-// {
-//     const std::string error_msg = "Unknown action. Available actions: check, reserve.";
-//     send(sockfd, error_msg.c_str(), error_msg.length(), 0);
-// }

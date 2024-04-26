@@ -57,7 +57,7 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
     addr.sin_port = htons(portno);
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         error("ERROR on binding");
-    // end
+
     return sockfd;
 }
 void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_map<std::string, int> &roomAvailability)
@@ -74,10 +74,10 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
     auto pos = received.find(',');
     std::string queryType = received.substr(0, pos);
     std::string roomCode = received.substr(pos + 1);
-    std::cout << "The Server S received an " + queryType + " request from the main server." << std::endl;
+    std::cout << "The Server U received an " + queryType + " request from the main server." << std::endl;
     std::string response;
     std::string output;
-    std::string conclusion = "The Server S finished sending the response to the main server.";
+    std::string conclusion = "The Server U finished sending the response to the main server.";
     std::string temp = queryType + "," + roomCode;
     if (queryType == "reservation")
     {
@@ -87,7 +87,7 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
             {
                 roomAvailability[roomCode]--;
                 output = "Successful reservation. The count of Room " + roomCode + " is now " + std::to_string(roomAvailability[roomCode]) + ".";
-                conclusion = "The Server S finished sending the response and the updated room status to the main server.";
+                conclusion = "The Server U finished sending the response and the updated room status to the main server.";
                 response = temp + ",yes";
             }
             else
@@ -133,11 +133,11 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
 int main()
 {
     std::string server_ip = "127.0.0.1";
-    int serverS_portno = 41203;
+    int serverS_portno = 43203;
     std::string server_name = "s";
     int sockS_fd = initial_UDP_socket(serverS_addr, serverS_portno);
     int serverM_portno = 44203;
-    std::cout << "The Server S is up and running using UDP on port 41203." << std::endl;
+    std::cout << "The Server U is up and running using UDP on port 43203." << std::endl;
 
     // from Beej's guide
     memset(&serverM_addr, 0, sizeof(serverM_addr));
@@ -145,8 +145,8 @@ int main()
     serverM_addr.sin_port = htons(serverM_portno);
     if (inet_pton(AF_INET, server_ip.c_str(), &serverM_addr.sin_addr) <= 0)
         error("ERROR on inet_pton");
-    // end
-    std::unordered_map<std::string, int> roomAvailability = load_data("single.txt");
+
+    std::unordered_map<std::string, int> roomAvailability = load_data("suite.txt");
     std::string message;
     for (const auto &[roomCode, count] : roomAvailability)
     {
@@ -165,7 +165,7 @@ int main()
             error("ERROR in sendto");
         }
 
-        std::cout << "The Server S has sent the room status to the main server." << std::endl;
+        std::cout << "The Server U has sent the room status to the main server." << std::endl;
     }
     else
     {

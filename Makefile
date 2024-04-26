@@ -3,7 +3,7 @@ CC = g++
 CFLAGS = -Wall -g
 
 # Target executables
-all: serverM serverS serverD client
+all: serverM serverS serverD serverU client
 
 # Compilation recipes
 serverM: serverM.cpp
@@ -13,6 +13,8 @@ serverS: serverS.cpp
 	$(CC) $(CFLAGS) -o serverS serverS.cpp
 serverD: serverD.cpp
 	$(CC) $(CFLAGS) -o serverD serverD.cpp	
+serverU: serverU.cpp
+	$(CC) $(CFLAGS) -o serverU serverU.cpp	
 
 
 client: client.cpp
@@ -20,4 +22,4 @@ client: client.cpp
 
 # Clean up
 clean:
-	rm -f serverM serverS serverD client
+	rm -f serverM serverS serverD serverU client
