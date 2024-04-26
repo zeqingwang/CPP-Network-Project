@@ -85,7 +85,8 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
     std::string response;
     std::string output;
     std::string conclusion = "The Server S finished sending the response to the main server.";
-    if (queryType == "Reservation")
+    std::string temp = queryType + "," + roomCode;
+    if (queryType == "reservation")
     {
         if (roomAvailability.count(roomCode) > 0)
         {
@@ -94,15 +95,18 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
                 roomAvailability[roomCode]--;
                 output = "Successful reservation. The count of Room " + roomCode + " is now " + std::to_string(roomAvailability[roomCode]) + ".";
                 conclusion = "The Server S finished sending the response and the updated room status to the main server.";
+                response = temp + ",yes";
             }
             else
             {
                 output = "Cannot make a reservation. Room " + roomCode + " is not available.";
+                response = temp + ",no";
             }
         }
         else
         {
             output = "Cannot make a reservation. Not able to find the room layout.";
+            response = temp + ",NA";
         }
     }
     else
@@ -113,20 +117,23 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
             {
 
                 output = "Room " + roomCode + " is available.";
+                response = temp + ",yes";
             }
             else
             {
                 output = "Room " + roomCode + " is not available.";
+                response = temp + ",no";
             }
         }
         else
         {
             output = "Not able to find the room layout.";
+            response = temp + ",NA";
         }
     }
 
     std::cout << output << std::endl;
-    sendto(sockfd, output.c_str(), output.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
+    sendto(sockfd, response.c_str(), response.length(), 0, (struct sockaddr *)&client_addr, client_addr_len);
     std::cout << conclusion << std::endl;
 }
 
@@ -137,7 +144,7 @@ int main()
     std::string server_name = "s";
     int sockS_fd = initial_UDP_socket(serverS_addr, serverS_portno);
     int serverM_portno = 44203;
-    std::cout << "The Server S is up and running using UDP on port <41203>." << std::endl;
+    std::cout << "The Server S is up and running using UDP on port 41203." << std::endl;
 
     memset(&serverM_addr, 0, sizeof(serverM_addr));
     serverM_addr.sin_family = AF_INET;
