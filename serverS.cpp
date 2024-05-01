@@ -29,7 +29,7 @@ std::unordered_map<std::string, int> load_data(const std::string &filename)
 
     if (!infile)
     {
-        error("ERROR opening file");
+        error("error opening file");
     }
 
     std::string line;
@@ -49,14 +49,14 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
-        error("ERROR opening socket");
+        error("error opening socket");
     // from Beej's guide
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     addr.sin_port = htons(portno);
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-        error("ERROR on binding");
+        error("error on binding");
     // end
     return sockfd;
 }
@@ -66,7 +66,7 @@ void respondToQuery(int sockfd, struct sockaddr_in &client_addr, std::unordered_
     socklen_t client_addr_len = sizeof(client_addr);
     int n = recvfrom(sockfd, buffer, 1023, 0, (struct sockaddr *)&client_addr, &client_addr_len);
     if (n < 0)
-        error("ERROR in recvfrom");
+        error("error in recvfrom");
 
     buffer[n] = '\0';
     std::string received(buffer);
@@ -144,7 +144,7 @@ int main()
     serverM_addr.sin_family = AF_INET;
     serverM_addr.sin_port = htons(serverM_portno);
     if (inet_pton(AF_INET, server_ip.c_str(), &serverM_addr.sin_addr) <= 0)
-        error("ERROR on inet_pton");
+        error("error on inet_pton");
     // end
     std::unordered_map<std::string, int> roomAvailability = load_data("single.txt");
     std::string message;
@@ -162,7 +162,7 @@ int main()
         if (sendto(sockS_fd, message.c_str(), message.length(), 0,
                    (struct sockaddr *)&serverM_addr, sizeof(serverM_addr)) < 0)
         {
-            error("ERROR in sendto");
+            error("error in sendto");
         }
 
         std::cout << "The Server S has sent the room status to the main server." << std::endl;

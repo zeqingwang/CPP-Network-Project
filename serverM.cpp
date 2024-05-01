@@ -42,7 +42,7 @@ std::unordered_map<std::string, std::string> loadCredentials(const std::string &
 
     if (!infile)
     {
-        error("ERROR opening file");
+        error("error opening file");
     }
 
     std::string line;
@@ -57,16 +57,16 @@ std::unordered_map<std::string, std::string> loadCredentials(const std::string &
 
     return credentials;
 }
-void handleUDP(int sockM_UDP_fd)
+void handleUDP(int sockM_UDPfd)
 {
 
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
     char buffer[1024] = {0};
-    int n = recvfrom(sockM_UDP_fd, buffer, 1023, 0, (struct sockaddr *)&cli_addr, &clilen);
+    int n = recvfrom(sockM_UDPfd, buffer, 1023, 0, (struct sockaddr *)&cli_addr, &clilen);
     if (n < 0)
     {
-        error("ERROR in recvfrom");
+        error("error in recvfrom");
     }
 
     std::string data(buffer, n);
@@ -251,7 +251,7 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
-        error("ERROR opening socket");
+        error("error opening socket");
     // Beej code
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -259,7 +259,7 @@ int initial_UDP_socket(struct sockaddr_in addr, int portno)
     addr.sin_port = htons(portno);
     // end
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-        error("ERROR on binding");
+        error("error on binding");
 
     return sockfd;
 }
@@ -269,7 +269,7 @@ int initial_TCP_socket(struct sockaddr_in addr, int portno)
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
-        error("ERROR opening socket");
+        error("error opening socket");
     // Beej code
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -277,7 +277,7 @@ int initial_TCP_socket(struct sockaddr_in addr, int portno)
     addr.sin_port = htons(portno);
     // end
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-        error("ERROR on binding");
+        error("error on binding");
     return sockfd;
 }
 void initial_UDP_connection(struct sockaddr_in *addr, int portno)
@@ -291,7 +291,7 @@ void initial_UDP_connection(struct sockaddr_in *addr, int portno)
 
 int main()
 {
-#ifdef EXTRA_ENCRYPTION
+#ifdef EXTRA_ENCRYPT
 
     credentials = loadCredentials("member_extra.txt");
 #else
@@ -301,50 +301,48 @@ int main()
     std::string server_ip = "127.0.0.1";
     int serverM_UDP_portno = 44203;
     int serverM_TCP_portno = 45203;
-    int sockM_UDP_fd = initial_UDP_socket(serverM_UDP_addr, serverM_UDP_portno);
-    int sockM_TCP_fd = initial_TCP_socket(serverM_TCP_addr, serverM_TCP_portno);
+    int sockM_UDPfd = initial_UDP_socket(serverM_UDP_addr, serverM_UDP_portno);
+    int sockM_TCPfd = initial_TCP_socket(serverM_TCP_addr, serverM_TCP_portno);
     initial_UDP_connection(&serverS_UDP_addr, 41203);
     initial_UDP_connection(&serverD_UDP_addr, 42203);
     initial_UDP_connection(&serverU_UDP_addr, 43203);
 
-    std::unordered_map<std::string, int> roomStatuses;
-
-    std::cout << "ServerM is running. Waiting for room statuses..." << std::endl;
-    listen(sockM_TCP_fd, 5);
+    std::cout << "The main server is up and running." << std::endl;
+    listen(sockM_TCPfd, 5);
 
     fd_set readfds;
-    int max_sd;
+    int maxsd;
     while (true)
     {
         // These FD functions after finish after reviewing the Beej tutorial
         FD_ZERO(&readfds);
-        FD_SET(sockM_UDP_fd, &readfds);
-        FD_SET(sockM_TCP_fd, &readfds);
-        max_sd = std::max(sockM_UDP_fd, sockM_TCP_fd);
+        FD_SET(sockM_UDPfd, &readfds);
+        FD_SET(sockM_TCPfd, &readfds);
+        maxsd = std::max(sockM_UDPfd, sockM_TCPfd);
         for (auto &pair : clients)
         {
             FD_SET(pair.first, &readfds);
-            max_sd = std::max(max_sd, pair.first);
+            maxsd = std::max(maxsd, pair.first);
         }
-        int activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
+        int activity = select(maxsd + 1, &readfds, NULL, NULL, NULL);
         if ((activity < 0) && (errno != EINTR))
         {
             printf("Select error");
         }
 
-        if (FD_ISSET(sockM_UDP_fd, &readfds))
+        if (FD_ISSET(sockM_UDPfd, &readfds))
         {
-            handleUDP(sockM_UDP_fd);
+            handleUDP(sockM_UDPfd);
         }
 
-        if (FD_ISSET(sockM_TCP_fd, &readfds))
+        if (FD_ISSET(sockM_TCPfd, &readfds))
         {
             struct sockaddr_in cli_addr;
             socklen_t clilen = sizeof(cli_addr);
-            int newsockfd = accept(sockM_TCP_fd, (struct sockaddr *)&cli_addr, &clilen);
+            int newsockfd = accept(sockM_TCPfd, (struct sockaddr *)&cli_addr, &clilen);
             if (newsockfd < 0)
             {
-                error("ERROR on accept");
+                error("error on accept");
             }
             else
             {
@@ -367,7 +365,7 @@ int main()
         }
     }
 
-    close(sockM_UDP_fd);
-    close(sockM_TCP_fd);
+    close(sockM_UDPfd);
+    close(sockM_TCPfd);
     return 0;
 }

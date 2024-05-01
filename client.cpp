@@ -42,15 +42,7 @@ std::string encrypt(const std::string &data)
 }
 std::string xor_encrypt(const std::string &data)
 {
-    // char key = 'W';
-    // std::string xorstring = data;
-    // for (size_t i = 0; i < data.size(); i++)
-    // {
-    //     xorstring[i] = data[i] ^ key;
-    // }
-    // // std::cout << xorstring << std::endl;
 
-    // return xorstring;
     char key = 'W';
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
@@ -73,14 +65,14 @@ int main()
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
-        error("ERROR opening socket");
+        error("error opening socket");
     // Beej code
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(45203);
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     // end
     if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-        error("ERROR connecting");
+        error("error connecting");
     if (getsockname(sockfd, (struct sockaddr *)&client_addr, &len) == -1)
     {
         error(" failed");
@@ -103,7 +95,7 @@ login:
         std::cout << username + " sent a guest request to the main server using TCP over port " << ntohs(client_addr.sin_port) << ".\n";
     }
     std::string raw_username = username;
-#ifdef EXTRA_ENCRYPTION
+#ifdef EXTRA_ENCRYPT
 
     username = xor_encrypt(username);
     password = xor_encrypt(password);
@@ -121,7 +113,7 @@ login:
 
     int n = read(sockfd, buffer, 1023);
     if (n < 0)
-        error("ERROR reading from socket");
+        error("error reading from socket");
 
     std::string strBuffer(buffer);
 
@@ -177,7 +169,7 @@ login:
         std::cout << raw_username + " sent an " + querytype + " request to the main server." << std::endl;
         int n = read(sockfd, buffer, 1023);
         if (n < 0)
-            error("ERROR reading from socket");
+            error("error reading from socket");
         std::string response(buffer, n);
         // std::string response(buffer);
         // std::cout << "XXX" + response << std::endl;
